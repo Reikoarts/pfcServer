@@ -49,7 +49,7 @@ wsServer.on('connection', function handleNewConnection(connection) {
         }));
 
     }
-    
+
 
     // Écoute des messages provenant du client
     connection.on('message', (data) => {
@@ -66,12 +66,23 @@ wsServer.on('connection', function handleNewConnection(connection) {
                 responses[1] = response;
             }
 
+            if(responses.length == 2){
+                clients[players[0]].send(JSON.stringify({
+                    "value": responses[1],
+                    "type": "enemy"
+                }));
+                clients[players[1]].send(JSON.stringify({
+                    "value": responses[0],
+                    "type": "enemy"
+                }));
+            }
+
             console.log(responses.length, "responses")
 
             if (responses.length == 2) {
 
                 //Envoyer le resultat au client
-        
+
                 if (responses[0] == responses[1]) {
                     result = 'nul';
                 }
@@ -85,49 +96,50 @@ wsServer.on('connection', function handleNewConnection(connection) {
                     // setWinJ2(winJ2 + 1);
                     result = "j2"
                 }
-        
-        
-        
+
+
+
                 switch (result) {
                     case 'j1':
                         clients[players[0]].send(JSON.stringify({
-                             "value": "Vous avez gagné",
-                             "type" : "game"
-                            }));
-                            clients[players[1]].send(JSON.stringify({
-                                "value": "Vous avez perdu",
-                                "type" : "game"
-                               }));
-                            
-                            setTimeout(() => {
-                                disconnectAllClients()
-                            }, 10)
+                            "value": "Vous avez gagné",
+                            "type": "game"
+                        }));
+
+                        clients[players[1]].send(JSON.stringify({
+                            "value": "Vous avez perdu",
+                            "type": "game"
+                        }));
+
+                        setTimeout(() => {
+                            disconnectAllClients()
+                        }, 10)
                         break;
                     case 'j2':
                         clients[players[0]].send(JSON.stringify({
                             "value": "Vous avez perdu",
-                            "type" : "game"
-                           }));
-                           clients[players[1]].send(JSON.stringify({
-                               "value": "Vous avez gagné",
-                               "type" : "game"
-                              }));
-                              setTimeout(() => {
-                                disconnectAllClients()
-                            }, 10)
+                            "type": "game"
+                        }));
+                        clients[players[1]].send(JSON.stringify({
+                            "value": "Vous avez gagné",
+                            "type": "game"
+                        }));
+                        setTimeout(() => {
+                            disconnectAllClients()
+                        }, 10)
                         break;
                     case 'nul':
                         clients[players[0]].send(JSON.stringify({
                             "value": "Égalité",
-                            "type" : "game"
-                           }));
-                           clients[players[1]].send(JSON.stringify({
-                               "value": "Égalité",
-                               "type" : "game"
-                            }));
-                              setTimeout(() => {
-                                disconnectAllClients()
-                            }, 10)
+                            "type": "game"
+                        }));
+                        clients[players[1]].send(JSON.stringify({
+                            "value": "Égalité",
+                            "type": "game"
+                        }));
+                        setTimeout(() => {
+                            disconnectAllClients()
+                        }, 10)
                         break;
                     default:
                         break;
@@ -142,12 +154,14 @@ wsServer.on('connection', function handleNewConnection(connection) {
 
 
     function disconnectAllClients() {
+        players.length = 0;
+        responses.length = 0;
+        result = null;
+
         for (let clientId in clients) {
             clients[clientId].close();
             delete clients[clientId];
         }
-
-        resetGame();
     }
 
 });
